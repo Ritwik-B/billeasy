@@ -1,0 +1,51 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_USER: user
+      DB_PASS: password
+      DB_NAME: mydatabase
+    volumes:
+      - .:/home/node/app
+      - /home/node/app/node_modules
+    depends_on:
+      - db
+    command: npm run dev
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  migrate:
+    build: .
+    entrypoint: ["npx", "sequelize-cli", "db:migrate"]
+    environment:
+      DB_HOST: db
+      DB_USER: user
+      DB_PASS: password
+      DB_NAME: mydatabase
+    depends_on:
+      - db
+
+  # seed:
+  #   build: .
+  #   entrypoint: ["npx", "sequelize-cli", "db:seed:all"]
+  #   environment:
+  #     DB_HOST: db
+  #     DB_USER: user
+  #     DB_PASS: password
+  #     DB_NAME: mydatabase
+  #   depends_on:
+  #     - db
+
+volumes:
+  postgres_data:
